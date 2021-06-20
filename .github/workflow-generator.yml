@@ -3,6 +3,7 @@ global:
     paths:
       workflow_generator:
         - .github/overlays/**
+    public: true
     ytt:
       template_paths: remote/ytt,this/.github/overlays
   workflows:
