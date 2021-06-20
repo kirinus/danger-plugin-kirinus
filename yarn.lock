@@ -1747,6 +1747,11 @@ cssstyle@^2.3.0:
   dependencies:
     cssom "~0.3.6"
 
+danger-plugin-kirinus@*:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/danger-plugin-kirinus/-/danger-plugin-kirinus-0.0.4.tgz#b720b5790d003309bbe7594366d709ded05bf32b"
+  integrity sha512-p1x6CthvB6AYy4lQN98X4R6tySwXrnlZSNQsiOzfVbv9yXqG3/D40tfdg1isQIyaq/BGGRrwdYQJzb6IQBaEqg==
+
 danger@*:
   version "10.6.4"
   resolved "https://registry.yarnpkg.com/danger/-/danger-10.6.4.tgz#b77e892d44e20a01b891ddbe62b6311027f42cf2"
