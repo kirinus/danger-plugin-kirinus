@@ -1,6 +1,6 @@
 {
   "name": "danger-plugin-kirinus",
-  "description": "Set of Danger rules used to check Kirinus Digital PRs.",
+  "description": "Set of Danger rules used to check Kirinus Digital PRs",
   "author": {
     "name": "Dario Blanco",
     "email": "development@kirinus.digital"
