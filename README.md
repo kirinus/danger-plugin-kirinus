@@ -26,11 +26,11 @@ To override the default parameters:
 import kirinus from 'danger-plugin-kirinus';
 
 kirinus({
-  conventionalCommitTypes = ['feat', 'fix', 'chore'],
-  minBodyLength = 30,
-  bigCommitsCount = 20,
-  bigPRLinesCount = 1000,
-  bigModifiedFilesCount = 50,
+  conventionalCommitTypes: ['feat', 'fix', 'chore'],
+  minBodyLength: 30,
+  bigCommitsCount: 20,
+  bigPRLinesCount: 1000,
+  bigModifiedFilesCount: 50,
 });
 ```
 
