@@ -14,9 +14,10 @@ jobs:
     - name: Use Node.js
       uses: actions/setup-node@v2
       with:
+        always-auth: true
         node-version: 14.17.1
-        registry-url: https://npm.pkg.github.com
-        scope: '@kirinus'
+        registry-url: https://registry.npmjs.org
+        scope: '@kirinus-digital'
     - name: Run build
       id: yarn_build
       run: yarn build
@@ -26,9 +27,9 @@ jobs:
     - name: Publish the package
       run: |
         npm --no-git-tag-version version $RELEASE_VERSION
-        npm config set registry https://npm.pkg.github.com
-        echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-        npm publish --access restricted
+        npm config set registry https://registry.npmjs.org
+        echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+        npm publish --access public
       env:
-        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
         RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
