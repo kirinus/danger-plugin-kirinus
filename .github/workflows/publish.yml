@@ -41,7 +41,6 @@ jobs:
       uses: ad-m/github-push-action@057a6ba835d986bfe495dd476a6c4db1d5f9503c
       with:
         branch: main
-        force: true
         github_token: ${{ secrets.REPO_ACCESS_TOKEN }}
     - name: Publish NPM package
       uses: JS-DevTools/npm-publish@v1
