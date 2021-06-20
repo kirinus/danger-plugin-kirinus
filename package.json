@@ -18,7 +18,7 @@
     "danger-plugin",
     "kirinus"
   ],
-  "version": "0.0.1",
+  "version": "0.0.4",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
   "scripts": {
