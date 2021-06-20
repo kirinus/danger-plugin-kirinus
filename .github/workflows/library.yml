@@ -41,6 +41,4 @@ jobs:
       uses: darioblanco/release-wizard@main
       with:
         draft: true
-        taskBaseUrl: https://ideamed-digital.atlassian.net/browse
-        taskPrefix: MHP-
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
