@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kirinus() Messages if everything is fine 1`] = `
+Array [
+  "
+## Changes
+
+### :zap: Features
+
+- \`commit 1\`
+
+### :wrench: Fixes
+
+- \`commit 2\`
+- \`commit 4\`
+
+### :construction_worker: Maintenance
+
+- \`commit 3\`
+
+### :books: Documentation
+
+- \`commit 4\`
+
+## Files
+
+- \`file1.md\`
+- \`file2.js\`
+  ",
+]
+`;

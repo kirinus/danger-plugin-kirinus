@@ -1,0 +1,11 @@
+{
+  "generator-danger-plugin": {
+    "promptValues": {
+      "authorName": "Kirinus Digital",
+      "authorEmail": "development@kirinus.digital",
+      "githubUsername": "darioblanco",
+      "useYarn": true,
+      "useTypeScript": true
+    }
+  }
+}
