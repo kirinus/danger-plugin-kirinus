@@ -1,0 +1,50 @@
+name: Publish
+"on":
+  release:
+    types:
+    - published
+env:
+  PACKAGE_JSON_FOLDER: .
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout current git repository
+      uses: actions/checkout@v2
+    - name: Install yarn dependencies
+      run: yarn install --immutable
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14.17.1
+    - name: Run build
+      id: yarn_build
+      run: yarn build
+    - name: Retrieve release version from raw tag
+      id: detect_version_from_tag
+      run: |
+        TAG_NAME=${{ github.event.release.tag_name }}
+        echo ::set-output name=version::${${TAG_NAME##*/}//v}
+    - name: Update package.json version to ${{ steps.detect_version_from_tag.outputs.version }}
+      uses: mikefarah/yq@v4.9.0
+      with:
+        cmd: |
+          yq e '.version = "${{ steps.detect_version_from_tag.outputs.version }}"' -i ${{ env.PACKAGE_JSON_FOLDER }}/package.json -j
+    - name: Commit new package.json version
+      run: |
+        git config --global user.email "bot@kirinus.digital"
+        git config --global user.name "kirinusbot"
+        git add ${{ env.PACKAGE_JSON_FOLDER }}/package.json
+        git commit -m "chore(): set version ${{ steps.detect_version_from_tag.outputs.version }}"
+    - name: Push changes to current git repository
+      uses: ad-m/github-push-action@057a6ba835d986bfe495dd476a6c4db1d5f9503c
+      with:
+        branch: main
+        force: true
+    - name: Publish NPM package
+      uses: JS-DevTools/npm-publish@v1
+      with:
+        access: public
+        package: ./package.json
+        registry: https://registry.npmjs.org
+        token: ${{ secrets.NPM_PUBLISH_TOKEN }}
