@@ -24,7 +24,8 @@ jobs:
       id: detect_version_from_tag
       run: |
         TAG_NAME=${{ github.event.release.tag_name }}
-        echo ::set-output name=version::${${TAG_NAME##*/}//v}
+        CLEAN_TAG=${TAG_NAME##*/}
+        echo ::set-output name=version::${CLEAN_TAG//v}
     - name: Update package.json version to ${{ steps.detect_version_from_tag.outputs.version }}
       uses: mikefarah/yq@v4.9.0
       with:
