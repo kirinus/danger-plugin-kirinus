@@ -6,10 +6,12 @@ name: Library
     paths:
     - .github/workflows/library.yml
     - '**/*.{js,ts}'
+    - package.json
   pull_request:
     paths:
     - .github/workflows/library.yml
     - '**/*.{js,ts}'
+    - package.json
   workflow_dispatch: null
 jobs:
   test:
