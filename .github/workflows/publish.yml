@@ -42,6 +42,7 @@ jobs:
       with:
         branch: main
         force: true
+        github_token: ${{ secrets.REPO_ACCESS_TOKEN }}
     - name: Publish NPM package
       uses: JS-DevTools/npm-publish@v1
       with:
