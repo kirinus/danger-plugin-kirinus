@@ -68,9 +68,6 @@ function getConventionalCommitType(conventionalCommitTypes: string[], text: stri
 }
 
 function renderCommitGroupMarkdown(group: string, messages: string[]) {
-  if (messages.length === 0) {
-    return '';
-  }
   const conventionalCommitConfig = conventionalCommitConfigs[group];
   if (conventionalCommitConfig) {
     return `
@@ -118,6 +115,26 @@ export default function kirinus({
     );
   }
 
+  // FAIL if title is longer than 72 characters
+  if (pr.title.length > 72) {
+    fail(
+      'PR title is longer than 72 characters. It should adapt to the ' +
+        '[Commit Message Guidelines](https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53) ' +
+        'and [Conventional Commits](https://conventionalcommits.org).'
+    );
+  }
+
+  // FAIL if title is not compliant with the basic conventional commits format
+  if (!/^.+(\([a-z-]*\))?: [a-z].+/.test(pr.title)) {
+    fail(
+      'PR title is not compliant with the [Conventional Commits Standard](https://conventionalcommits.org). ' +
+        'The expected format is `<type>(<scope>): <description>`.\n' +
+        '- The scope should be in lowercase and can only be separated with dashes (`-`). Can be skipped if the change is global. \n' +
+        `- The type should be one of ${conventionalCommitTypes.join(', ')}.\n` +
+        '- The summary should follow the [Commit Message Guidelines](https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53)'
+    );
+  }
+
   // WARN if title does not have a scope
   const prScopeMatch = /\(([^)]+)\)/.exec(pr.title);
   const prScope = prScopeMatch ? prScopeMatch[1] : undefined;
@@ -130,18 +147,6 @@ export default function kirinus({
         'See [Conventional Commits](https://conventionalcommits.org).'
     );
   }
-
-  // FAIL if title is not compliant with conventional commits
-  // const TITLE_REGEX = /^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z-]*\))?: [a-z][a-zA-Z0-9 ]+([[A-Z]+-[0-9]{4}])?/;
-  // if (!TITLE_REGEX.test(pr.title)) {
-  //   fail(
-  //     "PR title is not compliant with the [Conventional Commits Standard](https://conventionalcommits.org). " +
-  //       "The expected format is `<type>(<scope>): <description>`.\n" +
-  //       "- The scope should be in lowercase and can only be separated with dashes (`-`). Can be skipped if the change is global. \n" +
-  //       "- The type can be one of `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test`.\n" +
-  //       "- The description (and optional body and footer) should follow the [Commit Message Guidelines](https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53)"
-  //   );
-  // }
 
   // WARN if there is not a reference to a JIRA issue
   const JIRA_REGEX = /([A-Z]{3}-[0-9]{4})/;

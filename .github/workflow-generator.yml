@@ -8,5 +8,6 @@ global:
       template_paths: remote/ytt,this/.github/overlays
   workflows:
     - file: library.yml
+    - file: pr.yml
     - file: publish.yml
     - file: workflow-generator.yml

@@ -16,6 +16,8 @@ describe('kirinus()', () => {
         { commit: { message: 'chore(): commit 3' } },
         { commit: { message: 'docs(my-app2): commit 4' } },
         { commit: { message: 'fix(my-app): commit 4' } },
+        { commit: { message: 'no category 1' } },
+        { commit: { message: 'no category 2' } },
       ],
       pr: {
         additions: 200,
@@ -91,6 +93,49 @@ describe('kirinus()', () => {
     expect(global.warn).not.toBeCalled();
     expect(global.fail).toHaveBeenCalledWith(
       expect.stringMatching(/^PR title does not have a proper conventional type./)
+    );
+    expect(global.markdown).toBeCalled();
+  });
+
+  it('Fails if title is too long', () => {
+    global.danger = {
+      ...danger,
+      github: {
+        ...danger.github,
+        pr: {
+          ...danger.github.pr,
+          title:
+            'feat(my-app): my description is a very long description and it will fail[MHP-1234]',
+        },
+      },
+    };
+
+    kirinus();
+
+    expect(global.warn).not.toBeCalled();
+    expect(global.fail).toHaveBeenCalledWith(
+      expect.stringMatching(/^PR title is longer than 72 characters./)
+    );
+    expect(global.markdown).toBeCalled();
+  });
+
+  it('Fails if title is not compliant with conventional commit format', () => {
+    global.danger = {
+      ...danger,
+      github: {
+        ...danger.github,
+        pr: {
+          ...danger.github.pr,
+          title: 'feat(my-app): My description is upper case [MHP-1234]',
+        },
+      },
+    };
+
+    kirinus();
+
+    expect(global.warn).not.toBeCalled();
+    expect(global.fail).toHaveBeenCalledWith(
+      expect.stringMatching(/^PR title is not compliant with the./)
     );
     expect(global.markdown).toBeCalled();
   });

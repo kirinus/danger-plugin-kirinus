@@ -27,7 +27,7 @@
     "lint": "eslint ./src/**/*.ts",
     "predocs": "rm -rf docs/",
     "prepare": "yes | yarn husky install",
-    "test": "jest"
+    "test": "jest --coverage"
   },
   "license": "MIT",
   "engines": {
@@ -47,7 +47,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-ordered-imports": "^0.5.0",
     "husky": "^6.0.0",
-    "jest": "^20.0.4",
+    "jest": "^27.0.4",
     "prettier": "^2.3.1",
     "prettier-eslint": "^12.0.0",
     "pretty-quick": "^3.1.1",
@@ -56,20 +56,5 @@
   },
   "optionalDependencies": {
     "esdoc": "^0.5.2"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
-    "transform": {
-      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
-    },
-    "testRegex": "(.test)\\.(ts|tsx)$",
-    "testPathIgnorePatterns": [
-      "\\.snap$",
-      "<rootDir>/node_modules/"
-    ]
   }
 }
