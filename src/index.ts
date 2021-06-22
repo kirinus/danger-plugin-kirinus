@@ -206,46 +206,19 @@ async function checkConventional({
 }: ConventionalConfig = {}) {
   const { commits, pr } = danger.github;
 
-  let conventionalCheckFailed = false;
-  const { valid: isPrTitleValid } = await lint(pr.title, rules);
-  if (!isPrTitleValid) {
-    dangerEvent(
-      `PR title "${pr.title}" does not follow the [Conventional Commits](https://conventionalcommits.org) style.`,
-      severity
-    );
-    conventionalCheckFailed = true;
-  }
-
-  const invalidCommits: string[] = [];
-  for (const {
-    commit: { message },
-  } of commits) {
-    const { valid: isCommitValid } = await lint(message, rules);
+  const messages = commits.map(({ commit: { message } }) => message);
+  messages.push(pr.title);
+  for (const msg of messages) {
+    const { valid: isCommitValid, errors } = await lint(msg, rules);
     if (!isCommitValid) {
-      invalidCommits.push(message);
+      dangerEvent(
+        `Message "${msg}" does not follow the [Conventional Commits](https://conventionalcommits.org) style.\n` +
+          `- :exclamation: ${errors
+            .map(({ message }) => `\`${message}\``)
+            .join('\n- :exclamation: ')}`,
+        severity
+      );
     }
-  }
-
-  if (invalidCommits.length > 0) {
-    dangerEvent(
-      'The following commit messages do not follow the [Conventional Commits](https://conventionalcommits.org) style:\n' +
-        `- ${invalidCommits.map(message => `\`${message}\``).join('\n- ')}`,
-      severity
-    );
-    conventionalCheckFailed = true;
-  }
-
-  if (conventionalCheckFailed) {
-    dangerEvent(
-      `There were conventional lint failures in the PR title and/or branch commits.
-<details><summary>Show commitlint rules</summary>
-
-\`\`\`json
-${JSON.stringify(rules, null, 2)}
-\`\`\`
-</details>`,
-      severity
-    );
   }
 }
 

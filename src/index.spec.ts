@@ -106,14 +106,7 @@ describe('kirinus()', () => {
     expect(global.warn).not.toBeCalled();
     expect(global.fail).toBeCalledTimes(2);
     expect(global.fail).toHaveBeenCalledWith(
-      expect.stringMatching(
-        /^The following commit messages do not follow the \[Conventional Commits\]/
-      )
-    );
-    expect(global.fail).toHaveBeenCalledWith(
-      expect.stringMatching(
-        /^There were conventional lint failures in the PR title and\/or branch commits/
-      )
+      expect.stringMatching(/^Message \".*\" does not follow the \[Conventional Commits\]/)
     );
     expect(global.markdown).toBeCalled();
   });
@@ -157,14 +150,9 @@ describe('kirinus()', () => {
     await kirinus();
 
     expect(global.warn).not.toBeCalled();
-    expect(global.fail).toBeCalledTimes(2);
+    expect(global.fail).toBeCalledTimes(1);
     expect(global.fail).toHaveBeenCalledWith(
-      expect.stringMatching(/^PR title \".*\" does not follow the \[Conventional Commits\]/)
-    );
-    expect(global.fail).toHaveBeenCalledWith(
-      expect.stringMatching(
-        /^There were conventional lint failures in the PR title and\/or branch commits/
-      )
+      expect.stringMatching(/^Message \".*\" does not follow the \[Conventional Commits\]/)
     );
     expect(global.markdown).toBeCalled();
   });
