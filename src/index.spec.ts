@@ -1,6 +1,7 @@
 // eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import kirinus from './index';
+import { Severity } from './types';
 
 declare const global: any;
 
@@ -16,8 +17,6 @@ describe('kirinus()', () => {
         { commit: { message: 'chore(): commit 3' } },
         { commit: { message: 'docs(my-app2): commit 4' } },
         { commit: { message: 'fix(my-app): commit 4' } },
-        { commit: { message: 'no category 1' } },
-        { commit: { message: 'no category 2' } },
       ],
       pr: {
         additions: 200,
@@ -42,20 +41,30 @@ describe('kirinus()', () => {
     global.markdown = undefined;
   });
 
-  it('Messages if everything is fine', () => {
-    global.danger = danger;
+  it('Messages if everything is fine', async () => {
+    global.danger = {
+      ...danger,
+      github: {
+        ...danger.github,
+        commits: danger.github.commits.concat([
+          { commit: { message: 'no category 1' } },
+          { commit: { message: 'no category 2' } },
+        ]),
+        pr: {
+          ...danger.github.pr,
+        },
+      },
+    };
 
-    kirinus();
+    await kirinus({ conventional: { severity: Severity.Disable } });
 
-    expect(global.message).toHaveBeenCalledWith(
-      expect.stringMatching(/^You have added screenshots/)
-    );
+    expect(global.message).not.toBeCalled();
     expect(global.markdown.mock.calls[0]).toMatchSnapshot();
     expect(global.warn).not.toBeCalled();
     expect(global.fail).not.toBeCalled();
   });
 
-  it('Fails if there is no proper description', () => {
+  it('Fails if there is no proper description', async () => {
     global.danger = {
       ...danger,
       github: {
@@ -67,37 +76,49 @@ describe('kirinus()', () => {
       },
     };
 
-    kirinus();
+    await kirinus();
 
     expect(global.warn).not.toBeCalled();
+    expect(global.fail).toBeCalledTimes(1);
     expect(global.fail).toHaveBeenCalledWith(
       expect.stringMatching(/^PR needs a proper description./)
     );
     expect(global.markdown).toBeCalled();
   });
 
-  it('Fails if title does not start with a conventional commit type', () => {
+  it('Fails if there are commits that do not match the conventional style', async () => {
     global.danger = {
       ...danger,
       github: {
         ...danger.github,
+        commits: danger.github.commits.concat([
+          { commit: { message: 'no category 1' } },
+          { commit: { message: 'no category 2' } },
+        ]),
         pr: {
           ...danger.github.pr,
-          title: 'non-conventional(my-app): my description [MHP-1234]',
         },
       },
     };
 
-    kirinus();
+    await kirinus();
 
     expect(global.warn).not.toBeCalled();
+    expect(global.fail).toBeCalledTimes(2);
     expect(global.fail).toHaveBeenCalledWith(
-      expect.stringMatching(/^PR title does not have a proper conventional type./)
+      expect.stringMatching(
+        /^The following commit messages do not follow the \[Conventional Commits\]/
+      )
+    );
+    expect(global.fail).toHaveBeenCalledWith(
+      expect.stringMatching(
+        /^There were conventional lint failures in the PR title and\/or branch commits/
+      )
     );
     expect(global.markdown).toBeCalled();
   });
 
-  it('Fails if title is too long', () => {
+  it('Messages if title is too long', async () => {
     global.danger = {
       ...danger,
       github: {
@@ -110,16 +131,18 @@ describe('kirinus()', () => {
       },
     };
 
-    kirinus();
+    await kirinus({ prLint: { severity: Severity.Message } });
 
+    expect(global.fail).not.toBeCalled();
     expect(global.warn).not.toBeCalled();
-    expect(global.fail).toHaveBeenCalledWith(
+    expect(global.message).toBeCalledTimes(1);
+    expect(global.message).toHaveBeenCalledWith(
       expect.stringMatching(/^PR title is longer than 72 characters./)
     );
     expect(global.markdown).toBeCalled();
   });
 
-  it('Fails if title is not compliant with conventional commit format', () => {
+  it('Fails if title is not compliant with conventional commit format', async () => {
     global.danger = {
       ...danger,
       github: {
@@ -131,16 +154,22 @@ describe('kirinus()', () => {
       },
     };
 
-    kirinus();
+    await kirinus();
 
     expect(global.warn).not.toBeCalled();
+    expect(global.fail).toBeCalledTimes(2);
     expect(global.fail).toHaveBeenCalledWith(
-      expect.stringMatching(/^PR title is not compliant with the./)
+      expect.stringMatching(/^PR title \".*\" does not follow the \[Conventional Commits\]/)
+    );
+    expect(global.fail).toHaveBeenCalledWith(
+      expect.stringMatching(
+        /^There were conventional lint failures in the PR title and\/or branch commits/
+      )
     );
     expect(global.markdown).toBeCalled();
   });
 
-  it('Warns if title does not have a scope', () => {
+  it('Warns if title does not have a scope', async () => {
     global.danger = {
       ...danger,
       github: {
@@ -152,7 +181,7 @@ describe('kirinus()', () => {
       },
     };
 
-    kirinus();
+    await kirinus();
 
     expect(global.warn).toHaveBeenCalledWith(
       expect.stringMatching(/^This PR does not have a scope./)
@@ -161,7 +190,7 @@ describe('kirinus()', () => {
     expect(global.markdown).toBeCalled();
   });
 
-  it('Warns if there is no reference to a JIRA issue', () => {
+  it('Warns if there is no reference to a JIRA issue', async () => {
     global.danger = {
       ...danger,
       github: {
@@ -173,7 +202,7 @@ describe('kirinus()', () => {
       },
     };
 
-    kirinus();
+    await kirinus();
 
     expect(global.warn).toHaveBeenCalledWith(
       expect.stringMatching(/^Is this PR related to a JIRA issue?/)
@@ -182,37 +211,39 @@ describe('kirinus()', () => {
     expect(global.markdown).toBeCalled();
   });
 
-  it('Warns if there is a big number of commits', () => {
+  it('Warns if there is a big number of commits', async () => {
     global.danger = danger;
 
-    kirinus({ bigCommitsCount: 3 });
+    await kirinus({ branchSize: { maxCommits: 3 } });
 
     expect(global.warn).toHaveBeenCalledWith(
-      expect.stringMatching(/^:exclamation: This PR could be big!/)
+      ':exclamation: There are a lot of commits, which is a sign that changes can get out of hand.'
     );
     expect(global.fail).not.toBeCalled();
     expect(global.markdown).toBeCalled();
   });
 
-  it('Warns if there is a big number of line changes', () => {
+  it('Warns if there is a big number of line changes', async () => {
     global.danger = danger;
 
-    kirinus({ bigPRLinesCount: 100 });
+    await kirinus({ branchSize: { maxLines: 100 } });
 
     expect(global.warn).toHaveBeenCalledWith(
-      expect.stringMatching(/^:exclamation: This PR is huge!/)
+      expect.stringMatching(
+        /^:exclamation: This PR has \d+ additions and \d+ deletions. You should split it in smaller PRs./
+      )
     );
     expect(global.fail).not.toBeCalled();
     expect(global.markdown).toBeCalled();
   });
 
-  it('Warns if there are a lot of modified files', () => {
+  it('Warns if there are a lot of modified files', async () => {
     global.danger = danger;
 
-    kirinus({ bigModifiedFilesCount: 1 });
+    await kirinus({ branchSize: { maxFiles: 1 } });
 
     expect(global.warn).toHaveBeenCalledWith(
-      expect.stringMatching(/^There are a lot of modified files/)
+      ':exclamation: There are a lot of modified files, consider splitting this change in smaller PRs.'
     );
     expect(global.fail).not.toBeCalled();
     expect(global.markdown).toBeCalled();

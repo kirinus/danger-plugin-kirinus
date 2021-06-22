@@ -1,5 +1,17 @@
+import lint from '@commitlint/lint';
+import { rules as conventionalCommitRules } from '@commitlint/config-conventional';
+import { QualifiedRules } from '@commitlint/types';
+
 // eslint-disable-next-line eslint-comments/disable-enable-pair
 import { DangerDSLType } from '../node_modules/danger/distribution/dsl/DangerDSL';
+import {
+  BranchSizeConfig,
+  Config,
+  ConventionalConfig,
+  JIRAConfig,
+  PRLintConfig,
+  Severity,
+} from './types';
 
 // eslint-disable-next-line no-var
 declare var danger: DangerDSLType;
@@ -55,6 +67,7 @@ const conventionalCommitConfigs: Record<string, { name: string; emoji: string }>
     emoji: 'traffic_light',
   },
 };
+const conventionalCommitTypes = Object.keys(conventionalCommitConfigs);
 
 function getConventionalCommitType(conventionalCommitTypes: string[], text: string): string | null {
   let changeType: string | null = null;
@@ -65,6 +78,26 @@ function getConventionalCommitType(conventionalCommitTypes: string[], text: stri
     }
   });
   return changeType;
+}
+
+function dangerEvent(msg: string, severity: Severity, skipFail = false) {
+  switch (severity) {
+    case Severity.Fail:
+      if (skipFail) {
+        warn(msg);
+      } else {
+        fail(msg);
+      }
+      break;
+    case Severity.Warn:
+      warn(msg);
+      break;
+    case Severity.Message:
+      message(msg);
+      break;
+    case Severity.Disable:
+      break;
+  }
 }
 
 function renderCommitGroupMarkdown(group: string, messages: string[]) {
@@ -88,102 +121,137 @@ Consider using a scope for more grained results.
   }
 }
 
-/**
- * yo danger-plugin
- */
-export default function kirinus({
-  conventionalCommitTypes = Object.keys(conventionalCommitConfigs),
-  minBodyLength = 10,
-  bigCommitsCount = 10,
-  bigPRLinesCount = 2000,
-  bigModifiedFilesCount = 100,
-} = {}): void {
-  const { commits, pr } = danger.github;
-
-  // FAIL if there is not a proper description
+function lintPR({ minBodyLength = 10, severity = Severity.Fail }: PRLintConfig = {}) {
+  const { pr } = danger.github;
   if (pr.body.length < minBodyLength) {
-    fail('PR needs a proper description. Add a few sentences about what you want to change.');
-  }
-
-  // FAIL if title does not start with a conventional commit type
-  const prChangeType = getConventionalCommitType(conventionalCommitTypes, pr.title);
-  if (prChangeType == null) {
-    fail(
-      'PR title does not have a proper conventional type. ' +
-        `It should be one of ${conventionalCommitTypes.join(', ')}. ` +
-        'See [Conventional Commits](https://conventionalcommits.org).'
+    dangerEvent(
+      'PR needs a proper description. Add a few sentences about what you want to change.',
+      severity
     );
   }
 
-  // FAIL if title is longer than 72 characters
-  if (pr.title.length > 72) {
-    fail(
-      'PR title is longer than 72 characters. It should adapt to the ' +
+  const maxTitleLength = 72;
+  if (pr.title.length > maxTitleLength) {
+    dangerEvent(
+      `PR title is longer than ${maxTitleLength} characters. It should adapt to the ` +
         '[Commit Message Guidelines](https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53) ' +
-        'and [Conventional Commits](https://conventionalcommits.org).'
+        'and [Conventional Commits](https://conventionalcommits.org).',
+      severity
     );
   }
 
-  // FAIL if title is not compliant with the basic conventional commits format
-  if (!/^.+(\([a-z-]*\))?: [a-z].+/.test(pr.title)) {
-    fail(
-      'PR title is not compliant with the [Conventional Commits Standard](https://conventionalcommits.org). ' +
-        'The expected format is `<type>(<scope>): <description>`.\n' +
-        '- The scope should be in lowercase and can only be separated with dashes (`-`). Can be skipped if the change is global. \n' +
-        `- The type should be one of ${conventionalCommitTypes.join(', ')}.\n` +
-        '- The summary should follow the [Commit Message Guidelines](https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53)'
-    );
-  }
-
-  // WARN if title does not have a scope
   const prScopeMatch = /\(([^)]+)\)/.exec(pr.title);
   const prScope = prScopeMatch ? prScopeMatch[1] : undefined;
   if (!prScope) {
-    warn(
+    dangerEvent(
       'This PR does not have a scope. This might be ok, if the change is global and you do not want' +
         ' to have it in the Changelog. But it is not the normal case. ' +
         'Are you sure a scope is not needed? Consider adding a scope to the PR title with the ' +
         '`<type>(<scope>): <description>` format to avoid this issue. ' +
-        'See [Conventional Commits](https://conventionalcommits.org).'
+        'See [Conventional Commits](https://conventionalcommits.org).',
+      severity,
+      true
     );
   }
+}
 
-  // WARN if there is not a reference to a JIRA issue
+function checkJIRA({ severity = Severity.Warn }: JIRAConfig = {}) {
+  const { pr } = danger.github;
   const JIRA_REGEX = /([A-Z]{3}-[0-9]{4})/;
   if (!JIRA_REGEX.test(pr.title)) {
-    warn(
+    dangerEvent(
       'Is this PR related to a JIRA issue?\n' +
         'If so, link it at the end of the PR title, e.g. `feat(my-app): my description [MHP-XXXX]`. ' +
-        'Therefore, the PR will be referenced in JIRA so everybody can see it.'
+        'Therefore, the PR will be referenced in JIRA so everybody can see it.',
+      severity
+    );
+  }
+}
+
+function checkBranchSize({
+  maxCommits = 10,
+  maxLines = 2000,
+  maxFiles = 100,
+  severity = Severity.Warn,
+}: BranchSizeConfig = {}) {
+  const { modified_files: modifiedFiles } = danger.git;
+  const { commits, pr } = danger.github;
+
+  if (commits.length > maxCommits) {
+    dangerEvent(
+      ':exclamation: There are a lot of commits, which is a sign that changes can get out of hand.',
+      severity
     );
   }
 
-  // WARN if there is a big number of commits
-  if (commits.length > bigCommitsCount) {
-    warn(
-      ':exclamation: This PR could be big!' +
-        ' There are a lot of commits, which is a sign that changes can get out of hand.'
+  if (pr.additions + pr.deletions > maxLines) {
+    dangerEvent(
+      `:exclamation: This PR has ${pr.additions} additions and ${pr.deletions} deletions. ` +
+        'You should split it in smaller PRs.',
+      severity
     );
   }
 
-  // WARN if there is a big PR
-  if (pr.additions + pr.deletions > bigPRLinesCount) {
-    warn(':exclamation: This PR is huge! You should split it in smaller PRs.');
-  }
-
-  // WARN if modified files is a big list, MESSAGE otherwise
-  const modifiedFiles = danger.git.modified_files;
-  if (modifiedFiles.length > bigModifiedFilesCount) {
-    warn(
-      'There are a lot of modified files, unless you are updating packages under yarn2,' +
-        'consider splitting this in smaller PRs.'
+  if (modifiedFiles.length > maxFiles) {
+    dangerEvent(
+      ':exclamation: There are a lot of modified files, consider splitting this change in smaller PRs.',
+      severity
     );
   }
+}
 
-  // MESSAGE if screenshots were added
-  if (pr.body.includes('.png') || pr.body.includes('.jpg') || pr.body.includes('.gif')) {
-    message('You have added screenshots, you are an AMAZING human being :star:!');
+async function checkConventional({
+  rules = conventionalCommitRules as QualifiedRules,
+  severity = Severity.Fail,
+}: ConventionalConfig = {}) {
+  const { commits, pr } = danger.github;
+
+  let conventionalCheckFailed = false;
+  const { valid: isPrTitleValid } = await lint(pr.title, rules);
+  if (!isPrTitleValid) {
+    dangerEvent(
+      `PR title "${pr.title}" does not follow the [Conventional Commits](https://conventionalcommits.org) style.`,
+      severity
+    );
+    conventionalCheckFailed = true;
   }
+
+  const invalidCommits: string[] = [];
+  for (const {
+    commit: { message },
+  } of commits) {
+    const { valid: isCommitValid } = await lint(message, rules);
+    if (!isCommitValid) {
+      invalidCommits.push(message);
+    }
+  }
+
+  if (invalidCommits.length > 0) {
+    dangerEvent(
+      'The following commit messages do not follow the [Conventional Commits](https://conventionalcommits.org) style:\n' +
+        `- ${invalidCommits.map(message => `\`${message}\``).join('\n- ')}`,
+      severity
+    );
+    conventionalCheckFailed = true;
+  }
+
+  if (conventionalCheckFailed) {
+    dangerEvent(
+      `There were conventional lint failures in the PR title and/or branch commits.
+<details><summary>Show commitlint rules</summary>
+
+\`\`\`json
+${JSON.stringify(rules, null, 2)}
+\`\`\`
+</details>`,
+      severity
+    );
+  }
+}
+
+function renderMarkdown({ fileLimit = 50 }: { fileLimit?: number }) {
+  const { modified_files: modifiedFiles } = danger.git;
+  const { commits } = danger.github;
 
   // Group commits by change type
   const changesByType: Record<string, string[]> = {};
@@ -211,13 +279,29 @@ ${Object.entries(changesByType)
 
 ## Files
 ${
-  modifiedFiles.length > bigModifiedFilesCount
-    ? `\n:warning: Showing only first ${bigModifiedFilesCount} out of ${modifiedFiles.length}\n`
+  modifiedFiles.length > fileLimit
+    ? `\n:warning: Showing only first ${fileLimit} out of ${modifiedFiles.length}\n`
     : ''
 }
 - ${modifiedFiles
-    .slice(0, bigModifiedFilesCount + 1)
+    .slice(0, fileLimit + 1)
     .map(modifiedFile => `\`${modifiedFile}\``)
     .join('\n- ')}
   `);
+}
+
+/**
+ * yo danger-plugin
+ */
+export default async function kirinus({
+  branchSize,
+  conventional,
+  prLint,
+  jira,
+}: Config = {}): Promise<void> {
+  renderMarkdown({ fileLimit: branchSize && branchSize.maxFiles });
+  lintPR(prLint);
+  checkBranchSize(branchSize);
+  await checkConventional(conventional);
+  checkJIRA(jira);
 }
