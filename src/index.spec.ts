@@ -236,4 +236,26 @@ describe('kirinus()', () => {
     expect(global.fail).not.toBeCalled();
     expect(global.markdown).toBeCalled();
   });
+
+  it('Removes duplicates from same commit type', async () => {
+    global.danger = {
+      ...danger,
+      github: {
+        ...danger.github,
+        commits: danger.github.commits.concat([
+          { commit: { message: 'style: format files' } },
+          { commit: { message: 'style: format files' } },
+        ]),
+        pr: {
+          ...danger.github.pr,
+        },
+      },
+    };
+
+    await kirinus({ conventional: { severity: Severity.Disable } });
+
+    const content = global.markdown.mock.calls[0][0] as string;
+    expect(content.match(/format files/g)).toHaveLength(1);
+    expect(global.markdown.mock.calls[0]).toMatchSnapshot();
+  });
 });

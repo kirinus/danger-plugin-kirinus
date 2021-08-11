@@ -247,7 +247,9 @@ function renderMarkdown({ fileLimit = 50 }: { fileLimit?: number }) {
 ## Changes
 
 ${Object.entries(changesByType)
-  .map(([changeType, messages]) => renderCommitGroupMarkdown(changeType, messages))
+  .map(([changeType, messages]) =>
+    renderCommitGroupMarkdown(changeType, Array.from(new Set(messages)))
+  )
   .join('\n\n')}
 
 ## Files
