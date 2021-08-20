@@ -42,11 +42,6 @@ jobs:
         outputFiles: this/.github/workflows
         templatePaths: remote/ytt,this/.github/overlays
         token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Copy common configuration files
-      run: |
-        cp ${{ github.workspace }}/remote/dangerfile.ts ${{ github.workspace }}/this/dangerfile.ts
-        cp ${{ github.workspace }}/remote/commitlint.config.js ${{ github.workspace }}/this/commitlint.config.js
-        cp ${{ github.workspace }}/remote/.prettierignore ${{ github.workspace }}/this/.prettierignore
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v3
       with:

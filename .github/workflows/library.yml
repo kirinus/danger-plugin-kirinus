@@ -5,42 +5,48 @@ name: Library
     - main
     paths:
     - .github/workflows/library.yml
-    - '**/*.{js,ts}'
+    - '**/*.js'
+    - '**/*.ts'
     - package.json
   pull_request:
     paths:
     - .github/workflows/library.yml
-    - '**/*.{js,ts}'
+    - '**/*.js'
+    - '**/*.ts'
     - package.json
   workflow_dispatch: null
 jobs:
   test:
+    if: '!contains(github.event.head_commit.message, ''set package.json version'')'
     runs-on: ubuntu-latest
     steps:
     - name: Use Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: 14.17.1
+        node-version: 14.17.5
     - name: Checkout current git repository
       uses: actions/checkout@v2
     - name: Install yarn dependencies
       run: yarn install --immutable
+    - name: Run build
+      id: yarn_build
+      run: yarn build
     - name: Run lint
       id: yarn_lint
       run: yarn lint
     - name: Run test
       id: yarn_test
       run: yarn test
-    - name: Run build
-      id: yarn_build
-      run: yarn build
   draft-release:
     if: github.ref == 'refs/heads/main'
     needs: test
     runs-on: ubuntu-latest
     steps:
     - name: Create release draft
+      id: release-wizard
       uses: darioblanco/release-wizard@main
       with:
         draft: true
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        withV: true
+        pushTag: false
