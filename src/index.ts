@@ -121,7 +121,11 @@ Consider using a scope for more grained results.
   }
 }
 
-function lintPR({ minBodyLength = 10, severity = Severity.Fail }: PRLintConfig = {}) {
+function lintPR({
+  minBodyLength = 10,
+  severity = Severity.Fail,
+  scoped = true,
+}: PRLintConfig = {}) {
   const { pr } = danger.github;
   if (pr.body.length < minBodyLength) {
     dangerEvent(
@@ -142,7 +146,7 @@ function lintPR({ minBodyLength = 10, severity = Severity.Fail }: PRLintConfig =
 
   const prScopeMatch = /\(([^)]+)\)/.exec(pr.title);
   const prScope = prScopeMatch ? prScopeMatch[1] : undefined;
-  if (!prScope) {
+  if (scoped && !prScope) {
     dangerEvent(
       'This PR does not have a scope. This might be ok, if the change is global and you do not want' +
         ' to have it in the Changelog. But it is not the normal case. ' +

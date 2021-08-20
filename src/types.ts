@@ -22,6 +22,7 @@ export interface ConventionalConfig {
 export interface PRLintConfig {
   minBodyLength?: number;
   severity?: Severity;
+  scoped?: boolean;
 }
 
 export interface JIRAConfig {

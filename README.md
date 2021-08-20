@@ -43,10 +43,11 @@ import kirinus from 'danger-plugin-kirinus';
       severity: 'warn',
     },
     prLint: {
-      severity: 'disabled',
+      severity: 'message',
+      scoped: false,
     },
     jira: {
-      severity: 'message',
+      severity: 'disabled',
     },
   });
 })();
