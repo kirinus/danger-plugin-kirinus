@@ -1,4 +1,5 @@
-import kirinus from 'danger-plugin-kirinus';
+import kirinus from './src';
+import { Severity } from './src/types';
 
 (async function dangerReport() {
   await kirinus({
@@ -6,7 +7,7 @@ import kirinus from 'danger-plugin-kirinus';
       scoped: false,
     },
     jira: {
-      severity: 'disabled',
+      severity: Severity.Disable,
     },
   });
 })();
