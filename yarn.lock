@@ -2522,7 +2522,7 @@ __metadata:
     ts-jest: ^27.0.5
     typescript: ^4.3.5
   peerDependencies:
-    "@commitlint/lint": ">= 12"
+    "@commitlint/lint": ">= 13.1.0"
   languageName: unknown
   linkType: soft
 
