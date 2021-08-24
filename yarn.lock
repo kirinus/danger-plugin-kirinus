@@ -2517,7 +2517,7 @@ __metadata:
     jest: ^27.0.6
     jest-environment-node: ^27.0.6
     prettier: ^2.3.2
-    prettier-eslint: ^12.0.0
+    prettier-eslint: ^13.0.0
     pretty-quick: ^3.1.1
     ts-jest: ^27.0.5
     typescript: ^4.3.5
@@ -6300,9 +6300,9 @@ fsevents@^2.3.2:
   languageName: node
   linkType: hard
 
-"prettier-eslint@npm:^12.0.0":
-  version: 12.0.0
-  resolution: "prettier-eslint@npm:12.0.0"
+"prettier-eslint@npm:^13.0.0":
+  version: 13.0.0
+  resolution: "prettier-eslint@npm:13.0.0"
   dependencies:
     "@typescript-eslint/parser": ^3.0.0
     common-tags: ^1.4.0
@@ -6316,7 +6316,7 @@ fsevents@^2.3.2:
     require-relative: ^0.8.7
     typescript: ^3.9.3
     vue-eslint-parser: ~7.1.0
-  checksum: 0dd038e0f85ffe28ede8f8afc729d2455eecefa14db1c0003793e94c66d1d1b4c8d7b974b14dba7599adab880b73b6d02e86a6c55a9d616d7281ba778b075f9e
+  checksum: a745ae6d2d05ab8d596be6885f79dc0fd486d9e15408be2c7696fa87cec93f4f7d91afeae31d414260301402164f9e5e689b538795413aeaaa456e01df9184eb
   languageName: node
   linkType: hard
 
