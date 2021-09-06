@@ -235,7 +235,8 @@ function renderMarkdown({ fileLimit = 50 }: { fileLimit?: number }) {
   commits.forEach(({ commit: { message } }) => {
     const commitType = getConventionalCommitType(conventionalCommitTypes, message);
     if (commitType !== null && message.includes(':')) {
-      const description = message.split(':')[1].trim();
+      const [, scope, msg] = /\w+(?:\((\S+)?\))?:(.+)/.exec(message) as RegExpExecArray;
+      const description = scope ? `${scope}: ${msg.trim()}` : msg.trim();
       changesByType[commitType]
         ? changesByType[commitType].push(description)
         : (changesByType[commitType] = [description]);
