@@ -11,8 +11,8 @@ Array [
 
 ### :wrench: Fixes
 
-- \`commit 2\`
-- \`commit 4\`
+- \`my-app1: commit 2\`
+- \`my-app: commit 4\`
 
 ### :construction_worker: Maintenance
 
@@ -20,7 +20,7 @@ Array [
 
 ### :books: Documentation
 
-- \`commit 4\`
+- \`my-app2: commit 4\`
 
 ### :question: Uncategorized
 
@@ -49,8 +49,8 @@ Array [
 
 ### :wrench: Fixes
 
-- \`commit 2\`
-- \`commit 4\`
+- \`my-app1: commit 2\`
+- \`my-app: commit 4\`
 
 ### :construction_worker: Maintenance
 
@@ -58,7 +58,7 @@ Array [
 
 ### :books: Documentation
 
-- \`commit 4\`
+- \`my-app2: commit 4\`
 
 ### :nail_care: Style
 
