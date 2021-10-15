@@ -2486,7 +2486,7 @@ __metadata:
     eslint: ^8.0.1
     eslint-config-prettier: ^8.3.0
     eslint-plugin-eslint-comments: ^3.2.0
-    eslint-plugin-jest: ^25.0.5
+    eslint-plugin-jest: ^25.2.1
     eslint-plugin-node: ^11.1.0
     eslint-plugin-ordered-imports: ^0.5.0
     husky: ^7.0.2
@@ -2968,18 +2968,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-jest@npm:^25.0.5":
-  version: 25.0.5
-  resolution: "eslint-plugin-jest@npm:25.0.5"
+"eslint-plugin-jest@npm:^25.2.1":
+  version: 25.2.1
+  resolution: "eslint-plugin-jest@npm:25.2.1"
   dependencies:
     "@typescript-eslint/experimental-utils": ^5.0.0
   peerDependencies:
     "@typescript-eslint/eslint-plugin": ^4.0.0 || ^5.0.0
-    eslint: ^6.0.0 || ^7.0.0
+    eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
   peerDependenciesMeta:
     "@typescript-eslint/eslint-plugin":
       optional: true
-  checksum: 68826a0dfdda7aec1eed6eb5234c0a2e4adeed30e85b2ad464c3f7eff07aa3c59a5d7b6714085573d86f2cc48f16570f010b688c1dd08947bed6c2fd669f530b
+  checksum: 8ac8d1e2e138dd1371f7ebeba01559609049eb92b8561f15952217bd9a478a8f7aaa1e58ef3386962ae06096bc2ab56173a389ea8d2dfbc47a59afd23bdd09c6
   languageName: node
   linkType: hard
 
