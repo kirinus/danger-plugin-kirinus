@@ -32,12 +32,12 @@
     "node": ">=14"
   },
   "dependencies": {
-    "@commitlint/config-conventional": "^13.1.0",
-    "@commitlint/lint": "^13.1.0",
-    "@commitlint/types": "^13.1.0"
+    "@commitlint/config-conventional": "^13.2.0",
+    "@commitlint/lint": "^13.2.0",
+    "@commitlint/types": "^13.2.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^13.1.0",
+    "@commitlint/cli": "^13.2.1",
     "@types/jest": "^27.0.2",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
@@ -59,7 +59,7 @@
     "typescript": "^4.4.4"
   },
   "peerDependencies": {
-    "@commitlint/lint": ">= 13.1.0"
+    "@commitlint/lint": ">= 13.2.0"
   },
   "packageManager": "yarn@3.0.0"
 }
