@@ -45,10 +45,10 @@ jobs:
         fi
         echo "::set-output name=version::$VERSION"
     - name: Update package.json version to ${{ steps.load_version.outputs.version }}
-      uses: mikefarah/yq@v4.9.0
+      uses: mikefarah/yq@v4.13.5
       with:
         cmd: |
-          yq e '.version = "${{ steps.load_version.outputs.version }}"' -i ${{ env.PACKAGE_JSON_FOLDER }}/package.json -j
+          yq eval '.version = "${{ steps.load_version.outputs.version }}"' -i ${{ env.PACKAGE_JSON_FOLDER }}/package.json -j
     - name: Commit new package.json version
       run: |
         git config --global user.email "bot@kirinus.digital"
@@ -56,7 +56,7 @@ jobs:
         git add ${{ env.PACKAGE_JSON_FOLDER }}/package.json
         git commit -m "chore: set package.json version ${{ steps.load_version.outputs.version }}"
     - name: Push changes to current git repository
-      uses: ad-m/github-push-action@057a6ba835d986bfe495dd476a6c4db1d5f9503c
+      uses: ad-m/github-push-action@v0.6.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         branch: main
